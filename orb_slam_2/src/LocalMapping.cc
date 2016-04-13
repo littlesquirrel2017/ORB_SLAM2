@@ -31,7 +31,7 @@
 namespace ORB_SLAM2
 {
 
-LocalMapping::LocalMapping(MapBase *pMap, const float bMonocular):
+LocalMapping::LocalMapping(MapBase *pMap, const bool bMonocular):
     mbMonocular(bMonocular), mbResetRequested(false), mbFinishRequested(false), mbFinished(true), mpMap(pMap),
     mbAbortBA(false), mbStopped(false), mbStopRequested(false), mbNotStop(false), mbAcceptKeyFrames(true)
 {
@@ -40,11 +40,6 @@ LocalMapping::LocalMapping(MapBase *pMap, const float bMonocular):
 void LocalMapping::SetLoopCloser(LoopClosing* pLoopCloser)
 {
     mpLoopCloser = pLoopCloser;
-}
-
-void LocalMapping::SetTracker(Tracking *pTracker)
-{
-    mpTracker=pTracker;
 }
 
 void LocalMapping::Run()

@@ -33,20 +33,81 @@ namespace ORB_SLAM2
 
 long unsigned int KeyFrame::nNextId=0;
 
+KeyFrame::KeyFrame(
+    const long unsigned int id, const double timeStamp,
+    const CameraParameters& cameraParameters,
+    const std::vector<cv::KeyPoint>& vKeys, const cv::Mat& descriptors,
+    const DBoW2::BowVector& bowVec, const DBoW2::FeatureVector& featVec,
+    const std::vector<float>& vScaleFactors,
+    const std::vector<float>& vLevelSigma2):
+     mnId(id), mTimeStamp(timeStamp),
+
+     mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
+     mfGridElementWidthInv(cameraParameters.mfGridElementWidthInv),
+     mfGridElementHeightInv(cameraParameters.mfGridElementHeightInv),
+
+     mnTrackReferenceForFrame(0), mnFuseTargetForKF(0), mnBALocalForKF(0), mnBAFixedForKF(0),
+     mnLoopQuery(0), mnLoopWords(0), mnRelocQuery(0), mnRelocWords(0), mnBAGlobalForKF(0),
+
+     fx(cameraParameters.fx), fy(cameraParameters.fy), cx(cameraParameters.cx),
+     cy(cameraParameters.cy), invfx(cameraParameters.invfx),
+     invfy(cameraParameters.invfy), mbf(cameraParameters.mbf),
+     mb(cameraParameters.mb), mThDepth(cameraParameters.mThDepth),
+
+     N(vKeys.size()), mvKeys(vKeys), mvKeysUn(cameraParameters.unDistort(vKeys)),
+     mDescriptors(descriptors),
+     mBowVec(F.mBowVec), mFeatVec(F.mFeatVec), mnScaleLevels(F.mnScaleLevels), mfScaleFactor(F.mfScaleFactor),
+     mfLogScaleFactor(F.mfLogScaleFactor), mvScaleFactors(F.mvScaleFactors), mvLevelSigma2(F.mvLevelSigma2),
+     mvInvLevelSigma2(F.mvInvLevelSigma2),
+
+     mnMinX(F.mnMinX), mnMinY(F.mnMinY), mnMaxX(F.mnMaxX),
+     mnMaxY(F.mnMaxY), mK(F.mK),
+
+     mvpMapPoints(F.mvpMapPoints), mpKeyFrameDB(pKFDB),
+     mpORBvocabulary(F.mpORBvocabulary),
+
+     mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
+     mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap)
+{
+    mnId=nNextId++;
+
+    mGrid.resize(mnGridCols);
+    for(int i=0; i<mnGridCols;i++)
+    {
+        mGrid[i].resize(mnGridRows);
+        for(int j=0; j<mnGridRows; j++)
+            mGrid[i][j] = F.mGrid[i][j];
+    }
+
+    SetPose(F.mTcw);
+}
+
 KeyFrame::KeyFrame(Frame &F, MapBase *pMap, KeyFrameDatabase *pKFDB):
-    mnFrameId(F.mnId),  mTimeStamp(F.mTimeStamp), mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
-    mfGridElementWidthInv(F.mfGridElementWidthInv), mfGridElementHeightInv(F.mfGridElementHeightInv),
-    mnTrackReferenceForFrame(0), mnFuseTargetForKF(0), mnBALocalForKF(0), mnBAFixedForKF(0),
-    mnLoopQuery(0), mnLoopWords(0), mnRelocQuery(0), mnRelocWords(0), mnBAGlobalForKF(0),
-    fx(F.fx), fy(F.fy), cx(F.cx), cy(F.cy), invfx(F.invfx), invfy(F.invfy),
-    mbf(F.mbf), mb(F.mb), mThDepth(F.mThDepth), N(F.N), mvKeys(F.mvKeys), mvKeysUn(F.mvKeysUn),
-    mvuRight(F.mvuRight), mvDepth(F.mvDepth), mDescriptors(F.mDescriptors.clone()),
-    mBowVec(F.mBowVec), mFeatVec(F.mFeatVec), mnScaleLevels(F.mnScaleLevels), mfScaleFactor(F.mfScaleFactor),
-    mfLogScaleFactor(F.mfLogScaleFactor), mvScaleFactors(F.mvScaleFactors), mvLevelSigma2(F.mvLevelSigma2),
-    mvInvLevelSigma2(F.mvInvLevelSigma2), mnMinX(F.mnMinX), mnMinY(F.mnMinY), mnMaxX(F.mnMaxX),
-    mnMaxY(F.mnMaxY), mK(F.mK), mvpMapPoints(F.mvpMapPoints), mpKeyFrameDB(pKFDB),
-    mpORBvocabulary(F.mpORBvocabulary), mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
-    mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap)
+     mTimeStamp(F.mTimeStamp),
+
+     mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
+     mfGridElementWidthInv(F.mfGridElementWidthInv), mfGridElementHeightInv(F.mfGridElementHeightInv),
+
+     mnTrackReferenceForFrame(0), mnFuseTargetForKF(0), mnBALocalForKF(0), mnBAFixedForKF(0),
+     mnLoopQuery(0), mnLoopWords(0), mnRelocQuery(0), mnRelocWords(0), mnBAGlobalForKF(0),
+
+     fx(F.fx), fy(F.fy), cx(F.cx), cy(F.cy), invfx(F.invfx), invfy(F.invfy),
+     mbf(F.mbf), mb(F.mb), mThDepth(F.mThDepth),
+
+     N(F.N), mvKeys(F.mvKeys), mvKeysUn(F.mvKeysUn),
+     mvuRight(F.mvuRight), mvDepth(F.mvDepth), mDescriptors(F.mDescriptors.clone()),
+     mBowVec(F.mBowVec), mFeatVec(F.mFeatVec), mnScaleLevels(F.mnScaleLevels), mfScaleFactor(F.mfScaleFactor),
+     mfLogScaleFactor(F.mfLogScaleFactor), mvScaleFactors(F.mvScaleFactors), mvLevelSigma2(F.mvLevelSigma2),
+     mvInvLevelSigma2(F.mvInvLevelSigma2),
+
+     mnMinX(F.mnMinX), mnMinY(F.mnMinY), mnMaxX(F.mnMaxX),
+     mnMaxY(F.mnMaxY), mK(F.mK),
+
+     mvpMapPoints(F.mvpMapPoints), mpKeyFrameDB(pKFDB),
+     mpORBvocabulary(F.mpORBvocabulary),
+
+     mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
+     mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap)
 {
     mnId=nNextId++;
 

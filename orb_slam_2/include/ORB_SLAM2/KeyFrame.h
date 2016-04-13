@@ -122,7 +122,6 @@ public:
 
     static long unsigned int nNextId;
     long unsigned int mnId;
-    const long unsigned int mnFrameId;
 
     const double mTimeStamp;
 
@@ -231,6 +230,20 @@ protected:
     mutable std::mutex mMutexPose;
     std::mutex mMutexConnections;
     mutable std::mutex mMutexFeatures;
+
+private:
+    struct CameraParameters
+    {
+
+    };
+
+    KeyFrame::KeyFrame(
+        const long unsigned int id, const double timeStamp,
+        const CameraParameters& cameraParameters,
+        const std::vector<cv::KeyPoint>& vKeys, const cv::Mat& descriptors,
+        const DBoW2::BowVector& bowVec, const DBoW2::FeatureVector& featVec,
+        const std::vector<float>& vScaleFactors,
+        const std::vector<float>& vLevelSigma2);
 };
 
 } //namespace ORB_SLAM

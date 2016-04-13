@@ -79,7 +79,6 @@ public:
     long unsigned int mnId;
     static long unsigned int nNextId;
     long int mnFirstKFid;
-    long int mnFirstFrame;
     int nObs;
 
     // Variables used by the tracking
