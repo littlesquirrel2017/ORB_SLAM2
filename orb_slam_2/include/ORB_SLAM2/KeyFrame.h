@@ -234,16 +234,31 @@ protected:
 private:
     struct CameraParameters
     {
-
+      float mfGridElementWidthInv;
+      float mfGridElementHeightInv;
+      float fx, fy, cx, cy, invfx, invfy;
+      float mbf;
+      float mb;
+      float mThDepth;
+      int mnMinX, mnMinY, mnMaxX, mnMaxY;
+      cv::Mat mK;
+      std::vector<cv::KeyPoint> unDistort(
+          const std::vector<cv::KeyPoint>& distorted);
     };
 
-    KeyFrame::KeyFrame(
+    KeyFrame(
         const long unsigned int id, const double timeStamp,
         const CameraParameters& cameraParameters,
         const std::vector<cv::KeyPoint>& vKeys, const cv::Mat& descriptors,
         const DBoW2::BowVector& bowVec, const DBoW2::FeatureVector& featVec,
+        const int scale_levels, const float scale_factor,
+        const float log_scale_factor,
         const std::vector<float>& vScaleFactors,
-        const std::vector<float>& vLevelSigma2);
+        const std::vector<float>& vLevelSigma2,
+        const std::vector<float>& vInvLevelSigma2,
+        KeyFrameDatabase* keyframe_database,
+        ORBVocabulary* orb_vocabulary,
+        MapBase* map);
 };
 
 } //namespace ORB_SLAM

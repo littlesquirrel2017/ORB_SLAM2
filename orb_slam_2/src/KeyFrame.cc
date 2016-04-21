@@ -17,6 +17,9 @@
 * You should have received a copy of the GNU General Public License
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
+#include<mutex>
+
+#include <glog/logging.h>
 
 #include "ORB_SLAM2/Converter.h"
 #include "ORB_SLAM2/Frame.h"
@@ -26,7 +29,6 @@
 #include "ORB_SLAM2/MapPoint.h"
 #include "ORB_SLAM2/ORBmatcher.h"
 #include "ORB_SLAM2/ORBVocabulary.h"
-#include<mutex>
 
 namespace ORB_SLAM2
 {
@@ -38,8 +40,14 @@ KeyFrame::KeyFrame(
     const CameraParameters& cameraParameters,
     const std::vector<cv::KeyPoint>& vKeys, const cv::Mat& descriptors,
     const DBoW2::BowVector& bowVec, const DBoW2::FeatureVector& featVec,
+    const int scale_levels, const float scale_factor,
+    const float log_scale_factor,
     const std::vector<float>& vScaleFactors,
-    const std::vector<float>& vLevelSigma2):
+    const std::vector<float>& vLevelSigma2,
+    const std::vector<float>& vInvLevelSigma2,
+    KeyFrameDatabase* keyframe_database,
+    ORBVocabulary* orb_vocabulary,
+    MapBase* map):
      mnId(id), mTimeStamp(timeStamp),
 
      mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
@@ -56,19 +64,23 @@ KeyFrame::KeyFrame(
 
      N(vKeys.size()), mvKeys(vKeys), mvKeysUn(cameraParameters.unDistort(vKeys)),
      mDescriptors(descriptors),
-     mBowVec(F.mBowVec), mFeatVec(F.mFeatVec), mnScaleLevels(F.mnScaleLevels), mfScaleFactor(F.mfScaleFactor),
-     mfLogScaleFactor(F.mfLogScaleFactor), mvScaleFactors(F.mvScaleFactors), mvLevelSigma2(F.mvLevelSigma2),
-     mvInvLevelSigma2(F.mvInvLevelSigma2),
+     mBowVec(bowVec), mFeatVec(featVec), mnScaleLevels(scale_levels),
+     mfScaleFactor(scale_factor),
+     mfLogScaleFactor(log_scale_factor), mvScaleFactors(vScaleFactors),
+     mvLevelSigma2(vLevelSigma2), mvInvLevelSigma2(vInvLevelSigma2),
 
-     mnMinX(F.mnMinX), mnMinY(F.mnMinY), mnMaxX(F.mnMaxX),
-     mnMaxY(F.mnMaxY), mK(F.mK),
+     mnMinX(cameraParameters.mnMinX), mnMinY(cameraParameters.mnMinY),
+     mnMaxX(cameraParameters.mnMaxX), mnMaxY(cameraParameters.mnMaxY),
+     mK(cameraParameters.mK),
 
-     mvpMapPoints(F.mvpMapPoints), mpKeyFrameDB(pKFDB),
-     mpORBvocabulary(F.mpORBvocabulary),
+     mvpMapPoints(vKeys.size()), mpKeyFrameDB(keyframe_database),
+     mpORBvocabulary(orb_vocabulary),
 
      mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
-     mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap)
+     mbToBeErased(false), mbBad(false), mHalfBaseline(mb/2), mpMap(map)
 {
+    CHECK_NOTNULL(keyframe_database);
+    CHECK_NOTNULL(orb_vocabulary);
     mnId=nNextId++;
 
     mGrid.resize(mnGridCols);
