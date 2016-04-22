@@ -30,12 +30,11 @@
 #include "DBoW2/BowVector.h"
 #include "DBoW2/FeatureVector.h"
 
+#include "ORB_SLAM2/Frame.h"
 #include "ORB_SLAM2/ORBVocabulary.h"
 
 namespace ORB_SLAM2
 {
-
-class Frame;
 class KeyFrameDatabase;
 class MapBase;
 class MapPoint;
@@ -232,23 +231,9 @@ protected:
     mutable std::mutex mMutexFeatures;
 
 private:
-    struct CameraParameters
-    {
-      float mfGridElementWidthInv;
-      float mfGridElementHeightInv;
-      float fx, fy, cx, cy, invfx, invfy;
-      float mbf;
-      float mb;
-      float mThDepth;
-      int mnMinX, mnMinY, mnMaxX, mnMaxY;
-      cv::Mat mK;
-      std::vector<cv::KeyPoint> unDistort(
-          const std::vector<cv::KeyPoint>& distorted);
-    };
-
     KeyFrame(
         const long unsigned int id, const double timeStamp,
-        const CameraParameters& cameraParameters,
+        const Frame::CameraParameters& cameraParameters,
         const std::vector<cv::KeyPoint>& vKeys, const cv::Mat& descriptors,
         const DBoW2::BowVector& bowVec, const DBoW2::FeatureVector& featVec,
         const int scale_levels, const float scale_factor,
@@ -256,6 +241,7 @@ private:
         const std::vector<float>& vScaleFactors,
         const std::vector<float>& vLevelSigma2,
         const std::vector<float>& vInvLevelSigma2,
+        const cv::Mat &Tcw,
         KeyFrameDatabase* keyframe_database,
         ORBVocabulary* orb_vocabulary,
         MapBase* map);

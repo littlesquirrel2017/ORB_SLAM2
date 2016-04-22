@@ -23,7 +23,10 @@
 #include "ORB_SLAM2/MapPoint.h"
 #include "ORB_SLAM2/ORBextractor.h"
 #include "ORB_SLAM2/ORBmatcher.h"
+
 #include <thread>
+
+#include <glog/logging.h>
 
 namespace ORB_SLAM2
 {
@@ -226,23 +229,34 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
 
     mb = mbf/fx;
 
-    AssignFeaturesToGrid();
+    AssignFeaturesToGrid(mvKeysUn, mGrid);
 }
 
-void Frame::AssignFeaturesToGrid()
+void Frame::CameraParameters::AssignFeaturesToGrid(
+    const std::vector<cv::KeyPoint>& undistorted_keypoints, Grid* grid) const
 {
-    int nReserve = 0.5f*N/(FRAME_GRID_COLS*FRAME_GRID_ROWS);
-    for(unsigned int i=0; i<FRAME_GRID_COLS;i++)
-        for (unsigned int j=0; j<FRAME_GRID_ROWS;j++)
-            mGrid[i][j].reserve(nReserve);
+    CHECK_NOTNULL(grid)->clear();
+    grid->resize(FRAME_GRID_COLS);
 
-    for(int i=0;i<N;i++)
+    const size_t num_keypoints = undistorted_keypoints.size();
+
+    const int nReserve = 0.5f*num_keypoints/(FRAME_GRID_COLS*FRAME_GRID_ROWS);
+    for(unsigned int i=0; i<FRAME_GRID_COLS;i++)
     {
-        const cv::KeyPoint &kp = mvKeysUn[i];
+      grid[i].resize(FRAME_GRID_ROWS);
+      for (unsigned int j=0; j<FRAME_GRID_ROWS;j++)
+      {
+        grid[i][j].reserve(nReserve);
+      }
+    }
+
+    for(size_t i=0u;i<num_keypoints;i++)
+    {
+        const cv::KeyPoint &kp = undistorted_keypoints[i];
 
         int nGridPosX, nGridPosY;
-        if(PosInGrid(kp,nGridPosX,nGridPosY))
-            mGrid[nGridPosX][nGridPosY].push_back(i);
+        if(PosInGrid(kp, nGridPosX, nGridPosY))
+            grid[nGridPosX][nGridPosY].push_back(i);
     }
 }
 
@@ -381,16 +395,20 @@ std::vector<size_t> Frame::GetFeaturesInArea(const float &x, const float  &y, co
     return vIndices;
 }
 
-bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY)
+bool Frame::CameraParameters::PosInGrid(
+    const cv::KeyPoint &kp, int *posX, int *posY) const
 {
-    posX = round((kp.pt.x-mnMinX)*mfGridElementWidthInv);
-    posY = round((kp.pt.y-mnMinY)*mfGridElementHeightInv);
+  CHECK_NOTNULL(posX);
+  CHECK_NOTNULL(posY);
 
-    //Keypoint's coordinates are undistorted, which could cause to go out of the image
-    if(posX<0 || posX>=FRAME_GRID_COLS || posY<0 || posY>=FRAME_GRID_ROWS)
-        return false;
+  posX = round((kp.pt.x-mnMinX)*mfGridElementWidthInv);
+  posY = round((kp.pt.y-mnMinY)*mfGridElementHeightInv);
 
-    return true;
+  //Keypoint's coordinates are undistorted, which could cause to go out of the image
+  if(posX<0 || posX>=FRAME_GRID_COLS || posY<0 || posY>=FRAME_GRID_ROWS)
+    return false;
+
+  return true;
 }
 
 

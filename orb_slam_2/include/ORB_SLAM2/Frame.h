@@ -82,9 +82,6 @@ public:
     // and fill variables of the MapPoint to be used by the tracking
     bool isInFrustum(MapPoint* pMP, float viewingCosLimit);
 
-    // Compute the cell of a keypoint (return false if outside the grid)
-    bool PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY);
-
     std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r, const int minLevel=-1, const int maxLevel=-1) const;
 
     // Search a match for each keypoint in the left image to a keypoint in the right image.
@@ -96,6 +93,35 @@ public:
 
     // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
     cv::Mat UnprojectStereo(const int &i);
+
+    typedef std::vector<std::vector<std::vector<size_t>>> Grid;
+
+    struct CameraParameters
+    {
+      float mfGridElementWidthInv;
+      float mfGridElementHeightInv;
+      float fx, fy, cx, cy, invfx, invfy;
+      float mbf;
+      float mb;
+      float mThDepth;
+      float mnMinX, mnMinY, mnMaxX, mnMaxY;
+      cv::Mat mK;
+
+      CameraParameters(
+          const float _fx, const float _fy, const float _cx, const float _cy,
+          const float _mbf, const float _mThDepth, const float _mnMinX,
+          const float _mnMinY, const float _mnMaxX, const float _mnMaxY,
+          const cv::Mat& mK);
+
+      std::vector<cv::KeyPoint> unDistort(
+          const std::vector<cv::KeyPoint>& distorted) const;
+
+      void AssignFeaturesToGrid(
+          const std::vector<cv::KeyPoint>& undistorted_keypoints,
+          Grid* grid) const;
+
+      bool PosInGrid(const cv::KeyPoint &kp, int *posX, int *posY) const;
+    };
 
 public:
     // Vocabulary used for relocalization.
@@ -157,7 +183,7 @@ public:
     // Keypoints are assigned to cells in a grid to reduce matching complexity when projecting MapPoints.
     static float mfGridElementWidthInv;
     static float mfGridElementHeightInv;
-    std::vector<std::size_t> mGrid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
+    Grid mGrid;
 
     // Camera pose.
     cv::Mat mTcw;
@@ -196,9 +222,6 @@ private:
 
     // Computes image bounds for the undistorted image (called in the constructor).
     void ComputeImageBounds(const cv::Mat &imLeft);
-
-    // Assign keypoints to the grid for speed up feature matching (called in the constructor).
-    void AssignFeaturesToGrid();
 
     // Rotation, translation and camera center
     cv::Mat mRcw;

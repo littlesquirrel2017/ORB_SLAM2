@@ -22,7 +22,6 @@
 #include <glog/logging.h>
 
 #include "ORB_SLAM2/Converter.h"
-#include "ORB_SLAM2/Frame.h"
 #include "ORB_SLAM2/KeyFrame.h"
 #include "ORB_SLAM2/KeyFrameDatabase.h"
 #include "ORB_SLAM2/MapBase.h"
@@ -37,7 +36,7 @@ long unsigned int KeyFrame::nNextId=0;
 
 KeyFrame::KeyFrame(
     const long unsigned int id, const double timeStamp,
-    const CameraParameters& cameraParameters,
+    const Frame::CameraParameters& cameraParameters,
     const std::vector<cv::KeyPoint>& vKeys, const cv::Mat& descriptors,
     const DBoW2::BowVector& bowVec, const DBoW2::FeatureVector& featVec,
     const int scale_levels, const float scale_factor,
@@ -45,6 +44,7 @@ KeyFrame::KeyFrame(
     const std::vector<float>& vScaleFactors,
     const std::vector<float>& vLevelSigma2,
     const std::vector<float>& vInvLevelSigma2,
+    const cv::Mat &Tcw,
     KeyFrameDatabase* keyframe_database,
     ORBVocabulary* orb_vocabulary,
     MapBase* map):
@@ -81,17 +81,10 @@ KeyFrame::KeyFrame(
 {
     CHECK_NOTNULL(keyframe_database);
     CHECK_NOTNULL(orb_vocabulary);
-    mnId=nNextId++;
 
-    mGrid.resize(mnGridCols);
-    for(int i=0; i<mnGridCols;i++)
-    {
-        mGrid[i].resize(mnGridRows);
-        for(int j=0; j<mnGridRows; j++)
-            mGrid[i][j] = F.mGrid[i][j];
-    }
+    cameraParameters.AssignFeaturesToGrid(mvKeysUn, &mGrid);
 
-    SetPose(F.mTcw);
+    SetPose(Tcw);
 }
 
 KeyFrame::KeyFrame(Frame &F, MapBase *pMap, KeyFrameDatabase *pKFDB):
