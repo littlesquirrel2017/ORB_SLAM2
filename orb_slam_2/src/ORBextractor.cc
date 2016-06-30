@@ -1046,10 +1046,9 @@ static bool isBorderOrInvalidCoordinate(const KeyPoint& keyPoint, const Mat& ima
   if (keyPoint.pt.x > maxBorderX)
     return true;
   if (keyPoint.pt.y < minBorderY)
-      return true;
+    return true;
   if (keyPoint.pt.y > maxBorderY)
     return true;
-
 
   return false;
 }
@@ -1058,9 +1057,7 @@ static void setRandomDescriptor(uchar* desc)
 {
   for (int i = 0; i < 32; ++i)
   {
-    int val;
-    val = std::rand() % 256;
-    desc[i] = (uchar)val;
+    desc[i] = static_cast<uchar>(std::rand() % 256);
   }
 }
 
@@ -1071,15 +1068,17 @@ static void computeDescriptors(const Mat& image,
 {
     descriptors = Mat::zeros((int)keypoints.size(), 32, CV_8UC1);
 
-    for (size_t i = 0; i < keypoints.size(); i++)
+    for (unsigned int i = 0; i < keypoints.size(); i++)
+    {
       if (isBorderOrInvalidCoordinate(keypoints[i], image))
       {
-        setRandomDescriptor(descriptors.ptr((int)i));
+        setRandomDescriptor(descriptors.ptr(i));
       }
       else
       {
-        computeOrbDescriptor(keypoints[i], image, &pattern[0], descriptors.ptr((int)i));
+        computeOrbDescriptor(keypoints[i], image, &pattern[0], descriptors.ptr(i));
       }
+    }
 }
 
 void ORBextractor::computeDescriptorsForGivenKeypoints(
