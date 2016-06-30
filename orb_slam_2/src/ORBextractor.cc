@@ -53,7 +53,7 @@
 *
 */
 
-
+#include <glog/logging.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -119,7 +119,6 @@ static void computeOrbDescriptor(const KeyPoint& kpt,
         center[cvRound(pattern[idx].x*b + pattern[idx].y*a)*step + \
                cvRound(pattern[idx].x*a - pattern[idx].y*b)]
 
-
     for (int i = 0; i < 32; ++i, pattern += 16)
     {
         int t0, t1, val;
@@ -142,7 +141,6 @@ static void computeOrbDescriptor(const KeyPoint& kpt,
 
         desc[i] = (uchar)val;
     }
-
     #undef GET_VALUE
 }
 
@@ -1031,6 +1029,38 @@ void ORBextractor::ComputeKeyPointsOld(std::vector<std::vector<KeyPoint> > &allK
         computeOrientation(mvImagePyramid[level], allKeypoints[level], umax);
 }
 
+static bool isBorderOrInvalidCoordinate(const KeyPoint& keyPoint, const Mat& image)
+{
+  if (isnan(keyPoint.pt.x))
+    return true;
+  if (isnan(keyPoint.pt.y))
+    return true;
+
+  constexpr int minBorderX = EDGE_THRESHOLD - 3;
+  constexpr int minBorderY = EDGE_THRESHOLD - 3;
+  const int maxBorderX = image.cols - EDGE_THRESHOLD + 3;
+  const int maxBorderY = image.rows - EDGE_THRESHOLD + 3;
+
+  if (keyPoint.pt.x < minBorderX)
+    return true;
+  if (keyPoint.pt.x > maxBorderX)
+    return true;
+  if (keyPoint.pt.y < minBorderY)
+    return true;
+  if (keyPoint.pt.y > maxBorderY)
+    return true;
+
+  return false;
+}
+
+static void setRandomDescriptor(uchar* desc)
+{
+  for (int i = 0; i < 32; ++i)
+  {
+    desc[i] = static_cast<uchar>(std::rand() % 256);
+  }
+}
+
 static void computeDescriptors(const Mat& image,
                                const vector<KeyPoint>& keypoints,
                                Mat& descriptors,
@@ -1038,8 +1068,17 @@ static void computeDescriptors(const Mat& image,
 {
     descriptors = Mat::zeros((int)keypoints.size(), 32, CV_8UC1);
 
-    for (size_t i = 0; i < keypoints.size(); i++)
-        computeOrbDescriptor(keypoints[i], image, &pattern[0], descriptors.ptr((int)i));
+    for (unsigned int i = 0; i < keypoints.size(); i++)
+    {
+      if (isBorderOrInvalidCoordinate(keypoints[i], image))
+      {
+        setRandomDescriptor(descriptors.ptr(i));
+      }
+      else
+      {
+        computeOrbDescriptor(keypoints[i], image, &pattern[0], descriptors.ptr(i));
+      }
+    }
 }
 
 void ORBextractor::computeDescriptorsForGivenKeypoints(
