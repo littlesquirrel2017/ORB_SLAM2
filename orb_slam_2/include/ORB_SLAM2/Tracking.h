@@ -173,7 +173,7 @@ protected:
     SystemBase* mpSystem;
     
     //Drawers
-    Viewer* mpViewer;
+    Viewer* mpViewer = nullptr;
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
 

@@ -116,9 +116,12 @@ System::System(const std::string &strVocFile, const std::string &strSettingsFile
     //Initialize the Viewer thread and launch
     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
     if(bUseViewer)
-        mptViewer = new std::thread(&Viewer::Run, mpViewer);
-
-    mpTracker->SetViewer(mpViewer);
+    {
+      mptViewer = new std::thread(&Viewer::Run, mpViewer);
+      mpTracker->SetViewer(mpViewer);
+    }
+    else
+      mptViewer = nullptr;
 
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);
