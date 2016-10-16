@@ -1556,10 +1556,11 @@ bool Tracking::Relocalization()
 
 void Tracking::Reset()
 {
-    mpViewer->RequestStop();
+    if (mpViewer)
+      mpViewer->RequestStop();
 
-    cout << "System Reseting" << endl;
-    while(!mpViewer->isStopped())
+    cout << "System Reseting " << mpViewer << endl;
+    while(mpViewer && !mpViewer->isStopped())
         usleep(3000);
 
     // Reset Local Mapping
@@ -1595,7 +1596,10 @@ void Tracking::Reset()
     mlFrameTimes.clear();
     mlbLost.clear();
 
-    mpViewer->Release();
+    if (mpViewer)
+    {
+      mpViewer->Release();
+    }
 }
 
 void Tracking::ChangeCalibration(const string &strSettingPath)
