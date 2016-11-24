@@ -39,15 +39,15 @@ int main(int argc, char **argv)
     if(argc != 5)
     {
         cerr << endl << "Usage: ./mono_robotcar path_to_vocabulary"
-        		<< "path_to_settings  path_to_sequence  sensor_type"
-				<< endl << endl
-				<< "e.g.: ./devel/lib/orb_slam_2/mono_robotcar   "
-				<< "src/ORB_SLAM2/orb_slam_2/Vocabulary/ORBvoc.txt.proto   "
-				<< "~/catkin_ws/src/multiagent_orb/multiagent_orb/settings/"
-				<< "orb_settings_robotcar_monocular.yaml  "
-				<< "~/catkin_ws/datasets/robotcar-dataset/2014-07-14-15-16-36/"
-				<< "   mono_left"
-				<< endl;
+        	<< "path_to_settings  path_to_sequence  sensor_type"
+		<< endl << endl
+		<< "e.g.: ./devel/lib/orb_slam_2/mono_robotcar   "
+		<< "src/ORB_SLAM2/orb_slam_2/Vocabulary/ORBvoc.txt.proto   "
+		<< "~/catkin_ws/src/multiagent_orb/multiagent_orb/settings/"
+		<< "orb_settings_robotcar_monocular.yaml  "
+		<< "~/catkin_ws/datasets/robotcar-dataset/2014-07-14-15-16-36/"
+		<< "   mono_left"
+		<< endl;
         return 1;
     }
 
