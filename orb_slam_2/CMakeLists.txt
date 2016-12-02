@@ -54,6 +54,10 @@ cs_add_executable(mono_kitti
 Examples/Monocular/mono_kitti.cc)
 target_link_libraries(mono_kitti ${PROJECT_NAME})
 
+cs_add_executable(mono_robotcar
+Examples/Monocular/mono_robotcar.cc)
+target_link_libraries(mono_robotcar ${PROJECT_NAME})
+
 cs_add_executable(ros_mono
 src/ros_mono.cc)
 target_link_libraries(ros_mono ${PROJECT_NAME})
