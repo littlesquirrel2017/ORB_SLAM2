@@ -1,8 +1,22 @@
+#include "ORB_SLAM2/ORBVocabulary.h"
+
 #include <DBoW2/TemplatedVocabulary.h>
 #include <glog/logging.h>
 
 #include "DBoW2/FORB.h"
 #include "orb_vocabulary.pb.h"
+
+namespace ORB_SLAM2 {
+
+namespace orb_vocabulary {
+std::shared_ptr<ORBVocabulary> makeDefault()
+{
+  return std::make_shared<ORBVocabulary>(DEFAULT_VOCABULARY_FILE);
+}
+
+}  // namespace orb_vocabulary
+
+}  // namespace ORB_SLAM2
 
 namespace DBoW2 {
 

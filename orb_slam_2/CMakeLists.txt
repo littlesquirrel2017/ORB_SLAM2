@@ -10,6 +10,7 @@ PROTOBUF_CATKIN_GENERATE_CPP(PROTO_SRCS PROTO_HDRS proto/orb_node.proto
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_definitions(-Wall  -O3 -march=native -std=c++11 -DCOMPILEDWITHC11)
+add_definitions(-DDEFAULT_VOCABULARY_FILE="${CMAKE_SOURCE_DIR}/Vocabulary/ORBvoc.txt.proto")
 
 cs_add_library(${PROJECT_NAME} ${PROTO_SRCS}
 src/ORBVocabulary.cc

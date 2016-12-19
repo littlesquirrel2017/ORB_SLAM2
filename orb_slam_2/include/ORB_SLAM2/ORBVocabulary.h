@@ -22,6 +22,8 @@
 #ifndef ORBVOCABULARY_H
 #define ORBVOCABULARY_H
 
+#include <memory>
+
 #include"DBoW2/FORB.h"
 #include"DBoW2/TemplatedVocabulary.h"
 
@@ -30,6 +32,10 @@ namespace ORB_SLAM2
 
 typedef DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB>
   ORBVocabulary;
+
+namespace orb_vocabulary {
+std::shared_ptr<ORBVocabulary> makeDefault();
+}  // namespace orb_vocabulary
 
 } //namespace ORB_SLAM
 
