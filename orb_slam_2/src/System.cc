@@ -44,6 +44,10 @@ System::System(const std::string &strVocFile, const std::string &strSettingsFile
                const Sensor sensor, const bool bUseViewer)
 : System(strVocFile, strSettingsFile, sensor, bUseViewer, new Map) {}
 
+System::System(const std::string &strSettingsFile,
+               const Sensor sensor, const bool bUseViewer)
+: System("", strSettingsFile, sensor, bUseViewer, new Map) {}
+
 System::System(const std::string &strVocFile, const std::string &strSettingsFile,
                const Sensor sensor, const bool bUseViewer, MapBase* map)
 : mSensor(sensor),mbReset(false),mbActivateLocalizationMode(false),
@@ -89,7 +93,14 @@ System::System(const std::string &strVocFile, const std::string &strSettingsFile
     //Load ORB Vocabulary
     std::cout << std::endl << "Loading ORB Vocabulary. This could take a while..." << std::endl;
 
-    mpVocabulary = new ORBVocabulary(strVocFile);
+    if (strVocFile.empty())
+    {
+      mpVocabulary = new ORBVocabulary(DEFAULT_VOCABULARY_FILE);
+    }
+    else
+    {
+      mpVocabulary = new ORBVocabulary(strVocFile);
+    }
     std::cout << "Vocabulary loaded!" << std::endl << std::endl;
 
     //Create KeyFrame Database
