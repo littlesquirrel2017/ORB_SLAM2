@@ -48,7 +48,7 @@ public:
     // Pose functions
     void SetPose(const cv::Mat &Tcw);
     cv::Mat GetPose() const;
-    cv::Mat GetPoseInverse();
+    cv::Mat GetPoseInverse() const;
     cv::Mat GetCameraCenter();
     cv::Mat GetStereoCenter();
     cv::Mat GetRotation();
@@ -85,7 +85,7 @@ public:
     void EraseMapPointMatch(const size_t &idx);
     void EraseMapPointMatch(MapPoint* pMP);
     void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);
-    std::set<MapPoint*> GetMapPoints();
+    std::set<MapPoint*> GetMapPoints() const;
     std::vector<MapPoint*> GetMapPointMatches() const;
     int TrackedMapPoints(const int &minObs);
     MapPoint* GetMapPoint(const size_t &idx);

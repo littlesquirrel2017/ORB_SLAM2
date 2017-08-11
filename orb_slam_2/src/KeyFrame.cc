@@ -94,7 +94,7 @@ cv::Mat KeyFrame::GetPose() const
     return Tcw.clone();
 }
 
-cv::Mat KeyFrame::GetPoseInverse()
+cv::Mat KeyFrame::GetPoseInverse() const
 {
     std::unique_lock<std::mutex> lock(mMutexPose);
     return Twc.clone();
@@ -237,7 +237,7 @@ void KeyFrame::ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP)
     mvpMapPoints[idx]=pMP;
 }
 
-std::set<MapPoint*> KeyFrame::GetMapPoints()
+std::set<MapPoint*> KeyFrame::GetMapPoints() const
 {
     std::unique_lock<std::mutex> lock(mMutexFeatures);
     std::set<MapPoint*> s;

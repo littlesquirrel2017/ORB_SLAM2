@@ -51,6 +51,7 @@ public:
 
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
     System(const std::string &strVocFile, const std::string &strSettingsFile, const Sensor sensor, const bool bUseViewer = true);
+    System(const std::string &strSettingsFile, const Sensor sensor, const bool bUseViewer = true);
     // Allows to pass custom map class.
     System(const std::string &strVocFile, const std::string &strSettingsFile, const Sensor sensor, const bool bUseViewer, MapBase* map);
 
